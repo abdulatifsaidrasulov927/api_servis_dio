@@ -1,0 +1,43 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:api_servis_dio/blocs/articles/article_event.dart';
+import 'package:api_servis_dio/blocs/articles/article_state.dart';
+
+import 'package:api_servis_dio/data/repositories/article_repository.dart';
+import 'package:network_side/models/articles/article_model.dart';
+import 'package:network_side/models/universal_data.dart';
+
+class ArticleBloc extends Bloc<ArticleEvent, ArticleState> {
+  ArticleBloc({required this.articleRepository})
+      : super(ArticleInitialState()) {
+    on<GetArticles>(_getArticles);
+    // on<GetArticleById>(_getArticleById);
+  }
+
+  final ArticleRepository articleRepository;
+
+  Future<void> _getArticles(
+    GetArticles event,
+    Emitter<ArticleState> emit,
+  ) async {
+    emit(ArticleLoadingState());
+    UniversalData response = await articleRepository.getArticles();
+    if (response.error.isEmpty) {
+      emit(ArticleSuccessState(articles: response.data as List<ArticleModel>));
+    } else {
+      emit(ArticleErrorState(errorText: response.error));
+    }
+  }
+//
+// Future<void> _getArticleById(
+//   GetArticleById event,
+//   Emitter<ArticleState> emit,
+// ) async {
+//   emit(ArticleLoadingState());
+//   UniversalData response = await articleRepository.getArticleById(articleId:event.articleId);
+//   if (response.error.isEmpty) {
+//     emit(ArticleSuccessState(articles: response.data as List<ArticleModel>));
+//   } else {
+//     emit(ArticleErrorState(errorText: response.error));
+//   }
+// }
+}
